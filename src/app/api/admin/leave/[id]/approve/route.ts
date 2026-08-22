@@ -53,17 +53,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const day = current.getDay();
       if (day !== 0 && day !== 6) {
         const dateOnly = new Date(current);
-        const existing = await tx.attendanceRecord.findFirst({
-          where: { orgId: session.user!.orgId, employeeId: leaveRequest.employeeId, date: dateOnly },
-          select: { id: true },
+        // Now safe to use upsert — Member 2 added @@unique([employeeId, date])
+        await tx.attendanceRecord.upsert({
+          where: { employeeId_date: { employeeId: leaveRequest.employeeId, date: dateOnly } },
+          update: { status: "LEAVE" },
+          create: {
+            orgId: session.user!.orgId,
+            employeeId: leaveRequest.employeeId,
+            date: dateOnly,
+            status: "LEAVE",
+          },
         });
-        if (existing) {
-          await tx.attendanceRecord.update({ where: { id: existing.id }, data: { status: "LEAVE" } });
-        } else {
-          await tx.attendanceRecord.create({
-            data: { orgId: session.user!.orgId, employeeId: leaveRequest.employeeId, date: dateOnly, status: "LEAVE" },
-          });
-        }
       }
       current.setDate(current.getDate() + 1);
     }
