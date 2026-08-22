@@ -1,0 +1,231 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users             User[]
+  employees         Employee[]
+  departments       Department[]
+  attendanceRecords AttendanceRecord[]
+  leaveTypes        LeaveType[]
+  leaveRequests     LeaveRequest[]
+  leaveBalances     LeaveBalance[]
+  payrollRecords    PayrollRecord[]
+  documents         Document[]
+  auditLogs         AuditLog[]
+}
+
+model User {
+  id        String    @id @default(uuid())
+  orgId     String
+  email     String    @unique
+  password  String
+  role      String    @default("USER")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee?
+  auditLogs    AuditLog[]
+
+  @@index([orgId])
+}
+
+model Employee {
+  id           String    @id @default(uuid())
+  orgId        String
+  userId       String?   @unique
+  departmentId String?
+  firstName    String
+  lastName     String
+  email        String    @unique
+  phone        String?
+  hireDate     DateTime
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  organization      Organization       @relation(fields: [orgId], references: [id])
+  user              User?              @relation(fields: [userId], references: [id])
+  department        Department?        @relation(fields: [departmentId], references: [id])
+  attendanceRecords AttendanceRecord[]
+  leaveRequests     LeaveRequest[]
+  leaveBalances     LeaveBalance[]
+  payrollRecords    PayrollRecord[]
+  documents         Document[]
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([departmentId])
+}
+
+model Department {
+  id          String    @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+  managerId   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employees    Employee[]
+
+  @@index([orgId])
+  @@index([managerId])
+}
+
+model AttendanceRecord {
+  id         String    @id @default(uuid())
+  orgId      String
+  employeeId String
+  date       DateTime  @db.Date
+  checkIn    DateTime?
+  checkOut   DateTime?
+  status     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId])
+  @@index([employeeId, date])
+}
+
+model LeaveType {
+  id          String    @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+  daysAllowed Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organization  Organization   @relation(fields: [orgId], references: [id])
+  leaveRequests LeaveRequest[]
+  leaveBalances LeaveBalance[]
+
+  @@index([orgId])
+}
+
+model LeaveRequest {
+  id          String    @id @default(uuid())
+  orgId       String
+  employeeId  String
+  leaveTypeId String
+  startDate   DateTime  @db.Date
+  endDate     DateTime  @db.Date
+  status      String    @default("PENDING")
+  reason      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  leaveType    LeaveType    @relation(fields: [leaveTypeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId])
+  @@index([leaveTypeId])
+}
+
+model LeaveBalance {
+  id          String    @id @default(uuid())
+  orgId       String
+  employeeId  String
+  leaveTypeId String
+  year        Int
+  balance     Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  leaveType    LeaveType    @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([employeeId, leaveTypeId, year])
+  @@index([orgId])
+  @@index([employeeId])
+  @@index([leaveTypeId])
+}
+
+model PayrollRecord {
+  id          String    @id @default(uuid())
+  orgId       String
+  employeeId  String
+  periodStart DateTime  @db.Date
+  periodEnd   DateTime  @db.Date
+  basicSalary Float
+  deductions  Float     @default(0)
+  bonuses     Float     @default(0)
+  netPay      Float
+  status      String    @default("DRAFT")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId])
+}
+
+model Document {
+  id         String    @id @default(uuid())
+  orgId      String
+  employeeId String?
+  title      String
+  url        String
+  type       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee?    @relation(fields: [employeeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId])
+}
+
+model AuditLog {
+  id        String    @id @default(uuid())
+  orgId     String
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  details   Json?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([entity, entityId])
+}
