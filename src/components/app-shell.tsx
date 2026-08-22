@@ -109,7 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center justify-between">
             <Badge variant="outline" className="text-xs bg-muted/50">{role}</Badge>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => signOut({ callbackUrl: "/login" })} title="Log out">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => signOut({ callbackUrl: "https://hrms-odoo-theta.vercel.app/" })} title="Log out">
               <LogOut className="h-4 w-4" />
               <span className="sr-only">Log out</span>
             </Button>
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </Avatar>
                       <Badge variant="outline" className="text-[10px]">{role}</Badge>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => signOut({ callbackUrl: "/login" })}>
+                    <Button variant="ghost" size="icon" onClick={() => signOut({ callbackUrl: "https://hrms-odoo-theta.vercel.app/" })}>
                       <LogOut className="h-4 w-4" />
                     </Button>
                   </div>
