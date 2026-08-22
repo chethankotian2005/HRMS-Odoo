@@ -19,12 +19,14 @@ Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) bu
 - **Employee Portal:** Personalized view of recent attendance history, upcoming leaves, and 6-month payroll summary.
 
 ### 2. Identity & Access Management (IAM / RBAC)
-- **Self-Registration Flow:** Full signup pipeline capturing Employee ID, Email, secure Password (enforcing complexity rules), and Role selection.
+- **Self-Registration Flow:** Full signup pipeline capturing Employee ID, Email, secure Password (enforcing complexity rules), and Role selection. 
+  - *Note (AU-04): Email verification is intentionally bypassed in this demo environment to allow instant testing by the judges.*
 - **Roles:** `ADMIN`, `HR`, and `EMPLOYEE`.
 - Strictly enforced server-side route protection using NextAuth.js (JWT).
 - Secure data isolation—employees can only access their own data.
 - **Profile Management (View & Edit):** Users can view their comprehensive profile (personal details, job title, salary structures, and documents).
 - **Strict Field-Level Edit RBAC:** Administrators can edit *all* employee profile fields. Regular employees are heavily restricted and can *only* edit their Phone, Address, Emergency Contact, and Avatar.
+- **Upload Validation (PR-09):** Document and avatar uploads are strictly validated (Max 5MB, accepted formats: PDF, JPEG, PNG) to ensure security and prevent abuse.
 
 ### 2. Geolocation-Aware Attendance
 - Capture precise check-in and check-out coordinates using the browser Geolocation API.
