@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 type PayrollRecord = any; // simplified for the UI
 
@@ -14,7 +15,6 @@ export default function PayrollTableClient({ records }: { records: PayrollRecord
   };
 
   const getLopBreakdown = (record: any) => {
-    // Sometimes it's a JSON string in DB depending on Prisma setup, sometimes an object
     const breakdown = typeof record.breakdown === 'string' ? JSON.parse(record.breakdown) : record.breakdown;
     return breakdown?.lop;
   };
@@ -117,6 +117,17 @@ export default function PayrollTableClient({ records }: { records: PayrollRecord
               <div className="bg-muted p-4 rounded-lg flex justify-between items-center">
                 <span className="font-bold text-lg">Net Pay</span>
                 <span className="font-bold text-xl text-green-600">${selectedRecord.netPay.toLocaleString()}</span>
+              </div>
+
+              <div className="mt-6 border-t pt-4 flex justify-end">
+                <a 
+                  href={`/api/employees/${selectedRecord.employeeId}/payroll/${new Date(selectedRecord.periodStart).toISOString()}/pdf`} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  download
+                >
+                  <Button>Download Salary Slip (PDF)</Button>
+                </a>
               </div>
             </div>
           )}
