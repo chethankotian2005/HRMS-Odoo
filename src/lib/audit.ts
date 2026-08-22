@@ -1,4 +1,5 @@
-﻿import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
 interface AuditParams {
   orgId: string;
@@ -6,7 +7,7 @@ interface AuditParams {
   action: string;
   entity: string;
   entityId: string;
-  details?: Record<string, unknown>;
+  details?: Prisma.InputJsonValue;
 }
 
 /**

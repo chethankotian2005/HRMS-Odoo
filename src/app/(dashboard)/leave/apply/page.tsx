@@ -13,7 +13,11 @@ const schema = z.object({
   leaveTypeId: z.string().min(1, "Select a leave type"),
   startDate: z.string().min(1, "Start date required"),
   endDate: z.string().min(1, "End date required"),
-  halfDay: z.boolean().default(false),
+  // No .default() here: it would make the zod input type (halfDay optional)
+  // diverge from the output type (halfDay required), which breaks the
+  // Resolver<TInput, any, TOutput> match against useForm<FormData>.
+  // The field is always supplied via defaultValues below.
+  halfDay: z.boolean(),
   reason: z.string().max(500).optional(),
 });
 type FormData = z.infer<typeof schema>;

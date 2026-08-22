@@ -283,6 +283,8 @@ async function main() {
         periodStart,
         periodEnd,
         basicSalary: emp.monthlySalary,
+        // No separate HRA/allowance components in the seed, so gross == basic.
+        grossPay: emp.monthlySalary,
         deductions,
         bonuses: 0,
         netPay,

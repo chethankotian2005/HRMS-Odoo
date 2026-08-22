@@ -53,7 +53,16 @@ export async function POST(req: NextRequest) {
     select: { officeLat: true, officeLng: true, attendanceRadius: true },
   });
 
-  if (org?.officeLat !== null && org?.officeLng !== null && org?.attendanceRadius !== null) {
+  if (!org) {
+    return NextResponse.json({ error: "Organization not found" }, { status: 400 });
+  }
+
+  // Only enforce the geofence when the org has actually configured one.
+  if (
+    typeof org.officeLat === "number" &&
+    typeof org.officeLng === "number" &&
+    typeof org.attendanceRadius === "number"
+  ) {
     const distance = getDistance(lat, lng, org.officeLat, org.officeLng);
     if (distance > org.attendanceRadius) {
       return NextResponse.json(

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
 export interface AuditLogOptions {
@@ -6,8 +7,10 @@ export interface AuditLogOptions {
   action: string;
   entity: string;
   entityId: string;
-  before?: any;
-  after?: any;
+  before?: Prisma.InputJsonValue;
+  after?: Prisma.InputJsonValue;
+  /** Extra structured context; takes precedence over before/after when supplied. */
+  details?: Prisma.InputJsonValue;
   ipAddress?: string;
 }
 
@@ -19,6 +22,7 @@ export async function logAudit({
   entityId,
   before,
   after,
+  details,
   ipAddress,
 }: AuditLogOptions) {
   try {
@@ -29,7 +33,7 @@ export async function logAudit({
         action,
         entity,
         entityId,
-        details: (before || after) ? { before, after } : undefined,
+        details: details ?? ((before || after) ? { before, after } : undefined),
         ipAddress,
       },
     });
