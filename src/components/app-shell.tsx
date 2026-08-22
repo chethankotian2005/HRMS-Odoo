@@ -35,9 +35,8 @@ const navItems: NavItem[] = [
   { name: "Profile", href: "/employees/me", icon: User, roles: ["EMPLOYEE", "ADMIN", "HR"] },
   { name: "Attendance", href: "/attendance", icon: CalendarCheck, roles: ["EMPLOYEE", "ADMIN", "HR"] },
   { name: "Leave", href: "/leave", icon: CalendarOff, roles: ["EMPLOYEE", "ADMIN", "HR"] },
-  { name: "Payroll", href: "/payroll", icon: Banknote, roles: ["EMPLOYEE", "ADMIN", "HR"] },
+  { name: "Payroll", href: "/employees/me/payroll", icon: Banknote, roles: ["EMPLOYEE", "ADMIN", "HR"] },
   // Admin / HR Specific
-  { name: "Employees", href: "/employees", icon: Users, roles: ["ADMIN", "HR"] },
   { name: "Leave Approvals", href: "/admin/leave", icon: ClipboardCheck, roles: ["ADMIN", "HR"] },
   { name: "Attendance Admin", href: "/admin/attendance", icon: CalendarCheck, roles: ["ADMIN", "HR"] },
   { name: "Payroll Admin", href: "/admin/payroll", icon: Banknote, roles: ["ADMIN", "HR"] },

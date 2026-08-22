@@ -14,7 +14,13 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
-  const hasAccess = can(session.user as any, 'read', { type: 'PayrollRecord', ownerId: id, orgId: session.user.orgId });
+  let targetId = id;
+  if (targetId === "me") {
+    targetId = (session.user as any).employeeId;
+    if (!targetId) return notFound();
+  }
+
+  const hasAccess = can(session.user as any, 'read', { type: 'PayrollRecord', ownerId: targetId, orgId: session.user.orgId });
   
   if (!hasAccess) {
     return (
@@ -26,7 +32,7 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
   }
 
   const employee = await prisma.employee.findUnique({
-    where: { id: id },
+    where: { id: targetId },
     select: { firstName: true, lastName: true }
   });
 
@@ -34,7 +40,7 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
 
   // Fetch up to 6 latest payroll records
   const records = await prisma.payrollRecord.findMany({
-    where: { employeeId: id, orgId: session.user.orgId },
+    where: { employeeId: targetId, orgId: session.user.orgId },
     orderBy: { periodStart: 'desc' },
     take: 6,
   });

@@ -13,8 +13,14 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
+  let targetId = id;
+  if (targetId === "me") {
+    targetId = (session.user as any).employeeId;
+    if (!targetId) return notFound();
+  }
+
   const employee = await prisma.employee.findUnique({
-    where: { id: id },
+    where: { id: targetId },
     include: {
       department: true,
       payrollRecords: {
