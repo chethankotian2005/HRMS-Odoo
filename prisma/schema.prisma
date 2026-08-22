@@ -19,19 +19,20 @@ model Organization {
   officeLng        Float?
   attendanceRadius Int? // in meters
 
-  users               User[]
-  employees           Employee[]
-  departments         Department[]
-  attendanceRecords   AttendanceRecord[]
-  leaveTypes          LeaveType[]
-  leaveRequests       LeaveRequest[]
-  leaveBalances       LeaveBalance[]
-  leaveBalanceLedgers LeaveBalanceLedger[]
-  payrollRecords      PayrollRecord[]
-  salaryStructures    SalaryStructure[]
-  documents           Document[]
-  auditLogs           AuditLog[]
-  notifications       Notification[]
+  users                 User[]
+  employees             Employee[]
+  departments           Department[]
+  attendanceRecords     AttendanceRecord[]
+  attendanceCorrections AttendanceCorrection[]
+  leaveTypes            LeaveType[]
+  leaveRequests         LeaveRequest[]
+  leaveBalances         LeaveBalance[]
+  leaveBalanceLedgers   LeaveBalanceLedger[]
+  payrollRecords        PayrollRecord[]
+  salaryStructures      SalaryStructure[]
+  documents             Document[]
+  auditLogs             AuditLog[]
+  notifications         Notification[]
 }
 
 model User {
@@ -69,17 +70,18 @@ model Employee {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
 
-  organization        Organization         @relation(fields: [orgId], references: [id])
-  user                User?                @relation(fields: [userId], references: [id])
-  department          Department?          @relation(fields: [departmentId], references: [id])
-  attendanceRecords   AttendanceRecord[]
-  leaveRequests       LeaveRequest[]
-  leaveBalances       LeaveBalance[]
-  leaveBalanceLedgers LeaveBalanceLedger[]
-  payrollRecords      PayrollRecord[]
-  salaryStructures    SalaryStructure[]
-  documents           Document[]
-  notifications       Notification[]
+  organization          Organization           @relation(fields: [orgId], references: [id])
+  user                  User?                  @relation(fields: [userId], references: [id])
+  department            Department?            @relation(fields: [departmentId], references: [id])
+  attendanceRecords     AttendanceRecord[]
+  attendanceCorrections AttendanceCorrection[]
+  leaveRequests         LeaveRequest[]
+  leaveBalances         LeaveBalance[]
+  leaveBalanceLedgers   LeaveBalanceLedger[]
+  payrollRecords        PayrollRecord[]
+  salaryStructures      SalaryStructure[]
+  documents             Document[]
+  notifications         Notification[]
 
   @@index([orgId])
   @@index([userId])
@@ -332,4 +334,26 @@ model Notification {
 
   @@index([orgId])
   @@index([userId, isRead])
+}
+
+model AttendanceCorrection {
+  id                 String    @id @default(uuid())
+  orgId              String
+  employeeId         String
+  attendanceRecordId String?
+  date               DateTime  @db.Date
+  checkIn            DateTime?
+  checkOut           DateTime?
+  reason             String
+  status             String    @default("PENDING")
+  approvedById       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId])
+  @@index([status])
 }
