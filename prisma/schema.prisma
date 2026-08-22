@@ -16,6 +16,9 @@ model Organization {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  officeLat Float?
+  officeLng Float?
+  attendanceRadius Int? // in meters
 
   users                User[]
   employees            Employee[]
@@ -111,7 +114,9 @@ model AttendanceRecord {
   status     String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
+  deletedAt         DateTime?
+  deviceFingerprint String?
+  isSuspectedProxy  Boolean   @default(false)
 
   organization Organization @relation(fields: [orgId], references: [id])
   employee     Employee     @relation(fields: [employeeId], references: [id])
