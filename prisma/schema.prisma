@@ -29,14 +29,15 @@ model Organization {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  orgId     String
-  email     String    @unique
-  password  String
-  role      String    @default("USER")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id            String    @id @default(uuid())
+  orgId         String
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  role          String    @default("USER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   organization Organization @relation(fields: [orgId], references: [id])
   employee     Employee?
@@ -228,4 +229,13 @@ model AuditLog {
   @@index([orgId])
   @@index([userId])
   @@index([entity, entityId])
+}
+
+model VerificationToken {
+  id         String   @id @default(uuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
