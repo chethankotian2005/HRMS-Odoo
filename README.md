@@ -6,7 +6,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)](https://www.prisma.io/)
 [![Neon Postgres](https://img.shields.io/badge/Neon-Serverless-00E599?logo=postgresql)](https://neon.tech/)
 
-Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) built for the Smart India Hackathon (SIH). It unifies Attendance, Leave Management, and Payroll into a single, cohesive, financially-verifiable platform.
+Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) built for the Odoo Hackathon. It unifies Attendance, Leave Management, and Payroll into a single, cohesive, financially-verifiable platform.
 
 ### 🌐 Live Production Demo
 **URL:** [https://hrms-odoo-theta.vercel.app/](https://hrms-odoo-theta.vercel.app/)
