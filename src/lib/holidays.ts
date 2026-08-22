@@ -1,4 +1,6 @@
-﻿/**
+import { addDays, format, startOfDay } from "date-fns";
+
+/**
  * Public holidays for India (2024 & 2025).
  * Used to exclude holidays from leave day counts.
  * Format: YYYY-MM-DD
@@ -38,6 +40,19 @@ export const PUBLIC_HOLIDAYS: string[] = [
 ];
 
 /**
+ * Calendar-day key for a date, in the server's local timezone.
+ *
+ * Every calendar-day comparison in this codebase goes through this
+ * function. Never compare Date objects or raw ISO timestamps for
+ * calendar-day equality: `setHours(0,0,0,0)` normalizes in local time
+ * while `.toISOString()` re-serializes in UTC, so in any timezone east
+ * of UTC (IST is +05:30) the pair silently shifts the date back a day.
+ */
+export function toDateKey(date: Date): string {
+  return format(date, "yyyy-MM-dd");
+}
+
+/**
  * Check if a date is a weekend (Saturday or Sunday).
  */
 export function isWeekend(date: Date): boolean {
@@ -46,48 +61,48 @@ export function isWeekend(date: Date): boolean {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) is a public holiday.
+ * Check if a date is a public holiday. Accepts either a Date or an
+ * already-computed YYYY-MM-DD key.
  */
-export function isPublicHoliday(dateStr: string): boolean {
-  return PUBLIC_HOLIDAYS.includes(dateStr);
+export function isPublicHoliday(date: Date | string): boolean {
+  const key = typeof date === "string" ? date : toDateKey(date);
+  return PUBLIC_HOLIDAYS.includes(key);
 }
 
 /**
- * Count working days between two dates (inclusive), excluding weekends and public holidays.
- */
-export function countWorkingDays(start: Date, end: Date): number {
-  let count = 0;
-  const current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const endCopy = new Date(end);
-  endCopy.setHours(0, 0, 0, 0);
-
-  while (current <= endCopy) {
-    const dateStr = current.toISOString().split("T")[0];
-    if (!isWeekend(current) && !isPublicHoliday(dateStr)) {
-      count++;
-    }
-    current.setDate(current.getDate() + 1);
-  }
-  return count;
-}
-
-/**
- * Returns an array of all working day date strings (YYYY-MM-DD) in the range.
+ * Returns every working day date key (YYYY-MM-DD) in the inclusive range,
+ * excluding weekends and public holidays.
  */
 export function getWorkingDays(start: Date, end: Date): string[] {
   const days: string[] = [];
-  const current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  const endCopy = new Date(end);
-  endCopy.setHours(0, 0, 0, 0);
+  let current = startOfDay(start);
+  const endKey = toDateKey(end);
 
-  while (current <= endCopy) {
-    const dateStr = current.toISOString().split("T")[0];
-    if (!isWeekend(current) && !isPublicHoliday(dateStr)) {
-      days.push(dateStr);
+  // String comparison on YYYY-MM-DD is lexicographic == chronological,
+  // so the loop bound never touches Date arithmetic.
+  while (toDateKey(current) <= endKey) {
+    const key = toDateKey(current);
+    if (!isWeekend(current) && !isPublicHoliday(key)) {
+      days.push(key);
     }
-    current.setDate(current.getDate() + 1);
+    current = addDays(current, 1);
   }
   return days;
+}
+
+/**
+ * Count working days between two dates (inclusive), excluding weekends
+ * and public holidays.
+ */
+export function countWorkingDays(start: Date, end: Date): number {
+  return getWorkingDays(start, end).length;
+}
+
+/**
+ * Convert a YYYY-MM-DD key into the UTC-midnight Date that Prisma writes
+ * into a `@db.Date` column. AttendanceRecord.date uses this convention
+ * (see the check-in route), so every writer must agree on it.
+ */
+export function dateKeyToUtcDate(key: string): Date {
+  return new Date(`${key}T00:00:00.000Z`);
 }

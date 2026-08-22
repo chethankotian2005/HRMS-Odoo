@@ -1,5 +1,5 @@
-﻿import prisma from "@/lib/prisma";
-import { countWorkingDays } from "@/lib/holidays";
+import prisma from "@/lib/prisma";
+import { countWorkingDays, toDateKey } from "@/lib/holidays";
 import { getLeaveBalance } from "@/lib/leave/balance";
 
 export interface LeaveValidationResult {
@@ -72,7 +72,7 @@ export async function validateLeaveRequest(params: {
   });
   if (overlap) {
     errors.push(
-      `You already have an overlapping ${overlap.status.toLowerCase()} leave request from ${overlap.startDate.toISOString().split("T")[0]} to ${overlap.endDate.toISOString().split("T")[0]}.`
+      `You already have an overlapping ${overlap.status.toLowerCase()} leave request from ${toDateKey(overlap.startDate)} to ${toDateKey(overlap.endDate)}.`
     );
   }
 

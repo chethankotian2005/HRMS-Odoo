@@ -1,5 +1,5 @@
-﻿import prisma from "@/lib/prisma";
-import { getWorkingDays } from "@/lib/holidays";
+import prisma from "@/lib/prisma";
+import { getWorkingDays, toDateKey } from "@/lib/holidays";
 
 export interface ConflictWarning {
   date: string;
@@ -79,15 +79,13 @@ export async function checkLeaveConflicts(
   const warnings: ConflictWarning[] = [];
 
   for (const dayStr of workingDays) {
-    const dayDate = new Date(dayStr);
-
+    // Compare on YYYY-MM-DD keys, never on Date objects: mixing local
+    // setHours(0,0,0,0) with UTC-midnight @db.Date values shifts the
+    // calendar day by one east of UTC.
     const onLeaveToday = overlappingLeaves.filter((req) => {
-      const s = new Date(req.startDate);
-      const e = new Date(req.endDate);
-      s.setHours(0, 0, 0, 0);
-      e.setHours(0, 0, 0, 0);
-      dayDate.setHours(0, 0, 0, 0);
-      return s <= dayDate && dayDate <= e;
+      const startKey = toDateKey(req.startDate);
+      const endKey = toDateKey(req.endDate);
+      return startKey <= dayStr && dayStr <= endKey;
     });
 
     if (onLeaveToday.length > 0) {

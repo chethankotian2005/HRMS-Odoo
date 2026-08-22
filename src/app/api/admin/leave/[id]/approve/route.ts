@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
-import { countWorkingDays } from "@/lib/holidays";
+import { countWorkingDays, dateKeyToUtcDate, getWorkingDays, toDateKey } from "@/lib/holidays";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -44,29 +44,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    // 3. Upsert attendance records for each working day in the range
-    const current = new Date(leaveRequest.startDate);
-    current.setHours(0, 0, 0, 0);
-    const endDate = new Date(leaveRequest.endDate);
-    endDate.setHours(0, 0, 0, 0);
-
-    while (current <= endDate) {
-      const day = current.getDay();
-      if (day !== 0 && day !== 6) {
-        const dateOnly = new Date(current);
-        // Now safe to use upsert — Member 2 added @@unique([employeeId, date])
-        await tx.attendanceRecord.upsert({
-          where: { employeeId_date: { employeeId: leaveRequest.employeeId, date: dateOnly } },
-          update: { status: "LEAVE" },
-          create: {
-            orgId: session.user!.orgId,
-            employeeId: leaveRequest.employeeId,
-            date: dateOnly,
-            status: "LEAVE",
-          },
-        });
-      }
-      current.setDate(current.getDate() + 1);
+    // 3. Upsert attendance records for each working day in the range.
+    // Reuses getWorkingDays so the days flipped to LEAVE are exactly the
+    // days debited from the ledger above -- the previous loop skipped
+    // weekends only, leaving public holidays marked LEAVE but never
+    // debited. Dates are rebuilt as UTC midnight to match the @db.Date
+    // column convention used by the check-in route.
+    for (const dayKey of getWorkingDays(leaveRequest.startDate, leaveRequest.endDate)) {
+      const dateOnly = dateKeyToUtcDate(dayKey);
+      // Safe to upsert — @@unique([employeeId, date]) backs this.
+      await tx.attendanceRecord.upsert({
+        where: { employeeId_date: { employeeId: leaveRequest.employeeId, date: dateOnly } },
+        update: { status: "LEAVE" },
+        create: {
+          orgId: session.user!.orgId,
+          employeeId: leaveRequest.employeeId,
+          date: dateOnly,
+          status: "LEAVE",
+        },
+      });
     }
 
     // 4. Audit log inside the transaction
@@ -94,7 +90,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         userId: employeeUser.id,
         type: "LEAVE_APPROVED",
         title: "Leave Approved",
-        body: `Your ${leaveRequest.leaveType.name} leave from ${leaveRequest.startDate.toISOString().split("T")[0]} to ${leaveRequest.endDate.toISOString().split("T")[0]} has been approved.`,
+        body: `Your ${leaveRequest.leaveType.name} leave from ${toDateKey(leaveRequest.startDate)} to ${toDateKey(leaveRequest.endDate)} has been approved.`,
         entityId: id,
       },
     });

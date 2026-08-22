@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { logAudit } from "@/lib/audit/log";
 import { z } from "zod";
 import { differenceInSeconds } from "date-fns";
+import { toDateKey } from "@/lib/holidays";
 
 const decisionSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
@@ -127,7 +128,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           userId: employeeUser.id,
           type: "ATTENDANCE_CORRECTION_PROCESSED",
           title: `Attendance Correction ${status}`,
-          body: `Your attendance correction request for ${correction.date.toISOString().split("T")[0]} has been ${status.toLowerCase()}.`,
+          body: `Your attendance correction request for ${toDateKey(correction.date)} has been ${status.toLowerCase()}.`,
           entityId: correction.id,
         },
       });
