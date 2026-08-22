@@ -8,9 +8,17 @@
 
 Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) built for the Smart India Hackathon (SIH). It unifies Attendance, Leave Management, and Payroll into a single, cohesive, financially-verifiable platform.
 
+### 🌐 Live Production Demo
+**URL:** [https://hrms-odoo-theta.vercel.app/](https://hrms-odoo-theta.vercel.app/)
+
 ## 🌟 Key Features
 
-### 1. Multi-Tenant Role-Based Access Control (RBAC)
+### 1. Unified Dashboard & Analytics
+- **Admin Command Center:** Real-time metrics showing daily attendance (Present/Absent counts), pending leaves, and active capacity.
+- **Employee Directory:** Searchable, paginated directory of all organization members.
+- **Employee Portal:** Personalized view of recent attendance history, upcoming leaves, and 6-month payroll summary.
+
+### 2. Multi-Tenant Role-Based Access Control (RBAC)
 - **Roles:** `ADMIN`, `HR`, and `EMPLOYEE`.
 - Strictly enforced server-side route protection using NextAuth.js (JWT).
 - Secure data isolation—employees can only access their own data.
@@ -18,22 +26,24 @@ Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) bu
 ### 2. Geolocation-Aware Attendance
 - Capture precise check-in and check-out coordinates using the browser Geolocation API.
 - Live elapsed time tracking for active shifts.
-- **Correction Workflow:** Employees can submit attendance corrections which HR can approve/reject.
+- **Admin Override:** Administrators can forcefully clock employees in/out or mark them absent directly from the console.
+- **Correction Workflow:** Employees who forget to clock out can submit attendance corrections which HR can review and approve/reject.
 
 ### 3. Immutable Ledger-Based Leave Engine
 - Leave balances are calculated dynamically from an immutable transaction ledger (Credits for grants, Debits for usage).
-- **Smart Conflict Detection:** Warns HR if approving a leave drops a department's active capacity below 50%.
-- Accurate cross-timezone date calculations.
+- **Smart Conflict Detection:** Warns HR if approving a leave drops a department's active capacity below 50%, preventing critical understaffing.
+- Accurate cross-timezone date calculations avoiding UTC-to-IST off-by-one errors.
 
 ### 4. Automated Payroll Engine
-- Dynamic generation of basic pay, HRA, and allowances.
-- **Loss of Pay (LOP) Integration:** Automatically deducts pay based on absent days identified in the Attendance module.
-- Generates professional, downloadable **PDF Salary Slips** entirely on the server.
-- Translates Net Pay directly into English words (e.g., "FORTY THOUSAND RUPEES ONLY").
+- Dynamic generation of basic pay, HRA, and allowances using custom Salary Structures.
+- **Loss of Pay (LOP) Integration:** Automatically deducts pay based on absent days identified directly from the Attendance module's records.
+- Generates professional, downloadable **PDF Salary Slips** entirely on the server using `@react-pdf/renderer`.
+- Translates Net Pay directly into English words (e.g., "FORTY THOUSAND RUPEES ONLY") for official documentation.
 
 ### 5. Enterprise Compliance
-- **Immutable Audit Logs:** Tracks all sensitive actions (approvals, overrides, profile updates) to ensure accountability.
-- Real-time in-app bell notifications.
+- **Immutable Audit Logs:** Tracks all sensitive actions (approvals, overrides, profile updates) to ensure strict enterprise accountability.
+- Real-time in-app bell notifications for leave status updates.
+- **Robust Database Seeding:** A comprehensive data pipeline that instantly generates 30 realistic employees, over 6 months of historical attendance (4,000+ records), 80 leave requests, and complex payroll data for immediate testing.
 
 ## 🚀 Tech Stack
 
