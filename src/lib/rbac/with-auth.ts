@@ -2,13 +2,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import { can, Action, ResourceContext, UserContext } from "./policy";
+import { logAudit } from "@/lib/audit/log";
 
-type ApiHandler = (req: Request, context: any, user: UserContext) => Promise<NextResponse> | NextResponse;
+export type AuditFunction = (entity: string, entityId: string, before?: any, after?: any) => Promise<void>;
+
+type ApiHandler = (req: Request, context: any, user: UserContext, audit: AuditFunction) => Promise<NextResponse> | NextResponse;
 type ResourceContextResolver = (req: Request, context: any) => Promise<ResourceContext> | ResourceContext;
 
 /**
  * A higher-order function to wrap Next.js App Router API handlers.
  * It enforces RBAC policies centrally and returns 403 JSON on failure.
+ * It also provides an `audit()` function to easily log mutations.
  */
 export function withAuth(
   action: Action,
@@ -36,8 +40,27 @@ export function withAuth(
         );
       }
 
+      // Extract IP Address for auditing
+      const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "Unknown";
+
+      // Provide the audit logger bound to the current context
+      const audit: AuditFunction = async (entity, entityId, before, after) => {
+        if (['create', 'update', 'delete'].includes(action)) {
+          await logAudit({
+            orgId: user.orgId,
+            actorId: user.id,
+            action,
+            entity,
+            entityId,
+            before,
+            after,
+            ipAddress: ip,
+          });
+        }
+      };
+
       // If authorized, proceed to the actual handler
-      return await handler(req, context, user);
+      return await handler(req, context, user, audit);
     } catch (error) {
       console.error("[RBAC Wrapper Error]", error);
       return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
