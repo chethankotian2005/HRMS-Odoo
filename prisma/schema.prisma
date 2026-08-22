@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -16,16 +17,19 @@ model Organization {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  users             User[]
-  employees         Employee[]
-  departments       Department[]
-  attendanceRecords AttendanceRecord[]
-  leaveTypes        LeaveType[]
-  leaveRequests     LeaveRequest[]
-  leaveBalances     LeaveBalance[]
-  payrollRecords    PayrollRecord[]
-  documents         Document[]
-  auditLogs         AuditLog[]
+  users                User[]
+  employees            Employee[]
+  departments          Department[]
+  attendanceRecords    AttendanceRecord[]
+  leaveTypes           LeaveType[]
+  leaveRequests        LeaveRequest[]
+  leaveBalances        LeaveBalance[]
+  leaveBalanceLedgers  LeaveBalanceLedger[]
+  payrollRecords       PayrollRecord[]
+  salaryStructures     SalaryStructure[]
+  documents            Document[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
 }
 
 model User {
@@ -63,14 +67,17 @@ model Employee {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
 
-  organization      Organization       @relation(fields: [orgId], references: [id])
-  user              User?              @relation(fields: [userId], references: [id])
-  department        Department?        @relation(fields: [departmentId], references: [id])
-  attendanceRecords AttendanceRecord[]
-  leaveRequests     LeaveRequest[]
-  leaveBalances     LeaveBalance[]
-  payrollRecords    PayrollRecord[]
-  documents         Document[]
+  organization         Organization         @relation(fields: [orgId], references: [id])
+  user                 User?                @relation(fields: [userId], references: [id])
+  department           Department?          @relation(fields: [departmentId], references: [id])
+  attendanceRecords    AttendanceRecord[]
+  leaveRequests        LeaveRequest[]
+  leaveBalances        LeaveBalance[]
+  leaveBalanceLedgers  LeaveBalanceLedger[]
+  payrollRecords       PayrollRecord[]
+  salaryStructures     SalaryStructure[]
+  documents            Document[]
+  notifications        Notification[]
 
   @@index([orgId])
   @@index([userId])
@@ -132,25 +139,31 @@ model LeaveType {
 }
 
 model LeaveRequest {
-  id          String    @id @default(uuid())
-  orgId       String
-  employeeId  String
-  leaveTypeId String
-  startDate   DateTime  @db.Date
-  endDate     DateTime  @db.Date
-  status      String    @default("PENDING")
-  reason      String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id               String    @id @default(uuid())
+  orgId            String
+  employeeId       String
+  leaveTypeId      String
+  startDate        DateTime  @db.Date
+  endDate          DateTime  @db.Date
+  halfDay          Boolean   @default(false)
+  status           String    @default("PENDING") // PENDING | APPROVED | REJECTED | CANCELLED
+  reason           String?
+  rejectionReason  String?
+  approvedById     String?
+  approvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
-  organization Organization @relation(fields: [orgId], references: [id])
-  employee     Employee     @relation(fields: [employeeId], references: [id])
-  leaveType    LeaveType    @relation(fields: [leaveTypeId], references: [id])
+  organization        Organization         @relation(fields: [orgId], references: [id])
+  employee            Employee             @relation(fields: [employeeId], references: [id])
+  leaveType           LeaveType            @relation(fields: [leaveTypeId], references: [id])
+  leaveBalanceLedgers LeaveBalanceLedger[]
 
   @@index([orgId])
   @@index([employeeId])
   @@index([leaveTypeId])
+  @@index([status])
 }
 
 model LeaveBalance {
@@ -175,25 +188,35 @@ model LeaveBalance {
 }
 
 model PayrollRecord {
-  id          String    @id @default(uuid())
-  orgId       String
-  employeeId  String
-  periodStart DateTime  @db.Date
-  periodEnd   DateTime  @db.Date
-  basicSalary Float
-  deductions  Float     @default(0)
-  bonuses     Float     @default(0)
-  netPay      Float
-  status      String    @default("DRAFT")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id               String    @id @default(uuid())
+  orgId            String
+  employeeId       String
+  periodStart      DateTime  @db.Date
+  periodEnd        DateTime  @db.Date
+  basicSalary      Float
+  hra              Float     @default(0)
+  allowances       Float     @default(0)
+  grossPay         Float
+  pf               Float     @default(0)  // 12% of basic
+  professionalTax  Float     @default(0)
+  lopDays          Int       @default(0)
+  workingDays      Int       @default(0)
+  deductions       Float     @default(0)
+  bonuses          Float     @default(0)
+  netPay           Float
+  breakdown        Json?     // full earnings/deductions breakdown JSON
+  status           String    @default("DRAFT") // DRAFT | FINALIZED
+  version          Int       @default(1)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
   organization Organization @relation(fields: [orgId], references: [id])
   employee     Employee     @relation(fields: [employeeId], references: [id])
 
   @@index([orgId])
   @@index([employeeId])
+  @@index([periodStart, periodEnd])
 }
 
 model Document {
@@ -242,4 +265,64 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Immutable ledger — balance is derived by summing delta entries
+model LeaveBalanceLedger {
+  id              String    @id @default(uuid())
+  orgId           String
+  employeeId      String
+  leaveTypeId     String
+  year            Int
+  delta           Float     // positive = credit, negative = debit
+  reason          String    // ANNUAL_GRANT | APPROVED | REJECTED_REVERSAL | CANCELLED_REVERSAL
+  leaveRequestId  String?
+  createdAt       DateTime  @default(now())
+
+  organization Organization  @relation(fields: [orgId], references: [id])
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  leaveType    LeaveType     @relation(fields: [leaveTypeId], references: [id])
+  leaveRequest LeaveRequest? @relation(fields: [leaveRequestId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId, leaveTypeId, year])
+  @@index([leaveRequestId])
+}
+
+// Versioned salary structure — never overwrite, always add a new row with effectiveFrom
+model SalaryStructure {
+  id              String    @id @default(uuid())
+  orgId           String
+  employeeId      String
+  basicSalary     Float
+  hra             Float     @default(0)
+  allowances      Float     @default(0)
+  effectiveFrom   DateTime  @db.Date
+  createdById     String?
+  createdAt       DateTime  @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+
+  @@index([orgId])
+  @@index([employeeId, effectiveFrom])
+}
+
+// In-app notification model
+model Notification {
+  id         String    @id @default(uuid())
+  orgId      String
+  userId     String
+  type       String    // LEAVE_SUBMITTED | LEAVE_APPROVED | LEAVE_REJECTED
+  title      String
+  body       String
+  isRead     Boolean   @default(false)
+  entityId   String?   // e.g. leaveRequestId
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@index([userId, isRead])
 }
