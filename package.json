@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
-    "test": "jest",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -42,17 +41,14 @@
     "@jest/globals": "^30.4.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
-    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
-    "jest": "^30.4.2",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
-    "ts-jest": "^29.4.12",
     "tsx": "^4.23.12",
     "typescript": "^5"
   }

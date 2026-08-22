@@ -1,140 +1,105 @@
-# Dayflow — HRMS Application
+# Dayflow HRMS
 
-> Every workday, perfectly aligned.
+[![Next.js](https://img.shields.io/badge/Next.js-15.0-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-7.9-2D3748?logo=prisma)](https://www.prisma.io/)
+[![Neon Postgres](https://img.shields.io/badge/Neon-Serverless-00E599?logo=postgresql)](https://neon.tech/)
 
-A modern HR Management System built with Next.js 16 (App Router), TypeScript, Tailwind CSS, shadcn/ui, Prisma ORM, and PostgreSQL.
+Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) built for the Smart India Hackathon (SIH). It unifies Attendance, Leave Management, and Payroll into a single, cohesive, financially-verifiable platform.
 
----
+## 🌟 Key Features
 
-## Getting Started
+### 1. Multi-Tenant Role-Based Access Control (RBAC)
+- **Roles:** `ADMIN`, `HR`, and `EMPLOYEE`.
+- Strictly enforced server-side route protection using NextAuth.js (JWT).
+- Secure data isolation—employees can only access their own data.
+
+### 2. Geolocation-Aware Attendance
+- Capture precise check-in and check-out coordinates using the browser Geolocation API.
+- Live elapsed time tracking for active shifts.
+- **Correction Workflow:** Employees can submit attendance corrections which HR can approve/reject.
+
+### 3. Immutable Ledger-Based Leave Engine
+- Leave balances are calculated dynamically from an immutable transaction ledger (Credits for grants, Debits for usage).
+- **Smart Conflict Detection:** Warns HR if approving a leave drops a department's active capacity below 50%.
+- Accurate cross-timezone date calculations.
+
+### 4. Automated Payroll Engine
+- Dynamic generation of basic pay, HRA, and allowances.
+- **Loss of Pay (LOP) Integration:** Automatically deducts pay based on absent days identified in the Attendance module.
+- Generates professional, downloadable **PDF Salary Slips** entirely on the server.
+- Translates Net Pay directly into English words (e.g., "FORTY THOUSAND RUPEES ONLY").
+
+### 5. Enterprise Compliance
+- **Immutable Audit Logs:** Tracks all sensitive actions (approvals, overrides, profile updates) to ensure accountability.
+- Real-time in-app bell notifications.
+
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js (App Router)](https://nextjs.org/)
+- **Database:** [Neon Serverless PostgreSQL](https://neon.tech/)
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Authentication:** [NextAuth.js](https://next-auth.js.org/)
+- **PDF Generation:** [@react-pdf/renderer](https://react-pdf.org/)
+
+## ⚙️ Getting Started Locally
 
 ### Prerequisites
+- Node.js 18+
+- A PostgreSQL database (we recommend Neon)
 
-- **Node.js** ≥ 18
-- **PostgreSQL** — either a local instance or a hosted service (Neon, Supabase, etc.)
+### Installation
 
-### 1. Clone and install
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-org/HRMS-Odoo.git
+   cd HRMS-Odoo
+   ```
 
-```bash
-git clone https://github.com/chethankotian2005/HRMS-Odoo.git
-cd HRMS-Odoo
-npm install
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### 2. Configure environment
+3. Configure Environment Variables:
+   Create a `.env` file in the root directory:
+   ```env
+   DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+   NEXTAUTH_SECRET="your-super-secret-string"
+   NEXTAUTH_URL="http://localhost:3000"
+   ```
 
-```bash
-cp .env.example .env
-```
+4. Run Database Migrations:
+   ```bash
+   npx prisma migrate dev
+   ```
 
-Edit `.env` and fill in your values:
+5. Seed the Database:
+   This populates the database with 30 employees, 6 months of attendance, and historical payroll records.
+   ```bash
+   npm run seed
+   ```
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `NEXTAUTH_SECRET` | Generate with `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | `http://localhost:3000` for local dev |
+6. Start the Development Server:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-### 3. Set up the database
+## 🔐 Demo Credentials
 
-```bash
-npx prisma migrate dev      # Apply migrations and generate client
-npm run seed                 # Seed demo data (30 employees, attendance, leave, payroll)
-```
+Use the following credentials to test the various role capabilities:
 
-### 4. Start the development server
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `priya.sharma@acme.in` | `Admin@1234` |
+| **HR** | `geeta.tiwari@acme.in` | `Admin@1234` |
+| **Employee** | `arun.mehta@acme.in` | `Admin@1234` |
 
-```bash
-npm run dev
-```
+*Note: All 30 seeded employees use the password `Admin@1234`.*
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## 📄 License
 
-### Demo Credentials
-
-All demo accounts use password: **`Admin@1234`**
-
-| Role | Email |
-|---|---|
-| Admin | `priya.sharma@acme.in` |
-| HR | `rajesh.kumar@acme.in` |
-| Employee | `arun.mehta@acme.in` |
-
----
-
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages and API routes
-│   ├── (app)/              # Authenticated app shell (sidebar + auth guard)
-│   │   ├── admin/          # Admin-only pages (dashboard, leave approvals, payroll)
-│   │   ├── attendance/     # Employee attendance view
-│   │   ├── dashboard/      # Employee dashboard
-│   │   ├── employees/      # Employee profile, edit, payroll
-│   │   └── leave/          # Leave listing and application
-│   ├── api/                # API route handlers
-│   ├── login/              # Login page
-│   └── signup/             # Signup page
-├── components/             # Shared React components
-│   ├── ui/                 # shadcn/ui primitives
-│   ├── app-shell.tsx       # Sidebar + top bar layout
-│   └── providers.tsx       # NextAuth SessionProvider wrapper
-├── lib/                    # Shared utilities and business logic
-│   ├── leave/              # Leave balance (ledger-based)
-│   ├── payroll/            # Payroll computation
-│   ├── rbac/               # Role-based access control policies
-│   ├── audit.ts            # Audit log writer
-│   ├── holidays.ts         # Public holiday list + working-day utils
-│   └── prisma.ts           # Prisma client singleton
-└── types/                  # TypeScript type augmentations
-prisma/
-├── schema.prisma           # Database schema
-├── seed.ts                 # Idempotent seed script
-└── migrations/             # Prisma migration history
-```
-
----
-
-## Key Features
-
-- **Attendance** — GPS geofencing, device fingerprinting, proxy detection
-- **Leave Management** — Ledger-based balance tracking, annual grants, approval workflows
-- **Payroll** — Automated computation with PF, professional tax, LOP deductions
-- **RBAC** — Role-based access control (Admin, HR, Employee)
-- **Audit Trail** — Immutable audit log for all mutations
-- **IST-safe dates** — All calendar-day comparisons use `format(date, 'yyyy-MM-dd')`, never `setHours` + `toISOString`
-
----
-
-## Entity Relationship Diagram (ERD)
-
-```mermaid
-erDiagram
-    Organization ||--o{ User : "has"
-    Organization ||--o{ Employee : "has"
-    Organization ||--o{ Department : "has"
-    Organization ||--o{ AttendanceRecord : "has"
-    Organization ||--o{ LeaveType : "has"
-    Organization ||--o{ LeaveRequest : "has"
-    Organization ||--o{ LeaveBalanceLedger : "has"
-    Organization ||--o{ PayrollRecord : "has"
-    Organization ||--o{ SalaryStructure : "has"
-    Organization ||--o{ Document : "has"
-    Organization ||--o{ AuditLog : "has"
-
-    User ||--o| Employee : "can be"
-    User ||--o{ AuditLog : "creates"
-
-    Employee ||--o{ AttendanceRecord : "has"
-    Employee ||--o{ LeaveRequest : "has"
-    Employee ||--o{ LeaveBalanceLedger : "has"
-    Employee ||--o{ PayrollRecord : "has"
-    Employee ||--o{ SalaryStructure : "has"
-    Employee ||--o{ Document : "has"
-
-    Department ||--o{ Employee : "has"
-
-    LeaveType ||--o{ LeaveRequest : "has"
-    LeaveType ||--o{ LeaveBalanceLedger : "has"
-```
+This project is licensed under the MIT License - see the LICENSE file for details.
