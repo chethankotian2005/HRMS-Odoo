@@ -18,6 +18,8 @@ export default function AttendanceDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [correctionForm, setCorrectionForm] = useState({ date: "", checkIn: "", checkOut: "", reason: "" });
 
   // current time for timer
   const [now, setNow] = useState(new Date());
@@ -100,6 +102,25 @@ export default function AttendanceDashboard() {
     }
   };
 
+  const submitCorrection = async () => {
+    try {
+      const res = await fetch("/api/attendance/correction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...correctionForm,
+          checkIn: correctionForm.checkIn ? `${correctionForm.date}T${correctionForm.checkIn}:00` : undefined,
+          checkOut: correctionForm.checkOut ? `${correctionForm.date}T${correctionForm.checkOut}:00` : undefined,
+        })
+      });
+      if (!res.ok) throw new Error("Failed to submit request");
+      setShowCorrectionModal(false);
+      alert("Correction request submitted!");
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
   if (loading) return <div className="p-8 flex justify-center"><div className="animate-spin h-8 w-8 border-4 border-black border-t-transparent rounded-full dark:border-white dark:border-t-transparent" /></div>;
 
   // Compute stats
@@ -159,7 +180,16 @@ export default function AttendanceDashboard() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold tracking-tight">Employee Attendance</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Attendance</h1>
+        <button 
+          onClick={() => setShowCorrectionModal(true)}
+          className="text-sm px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-900 font-medium"
+        >
+          Regularize Attendance
+        </button>
+      </div>
+
       {error && (
         <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-center border border-red-200">
           <AlertTriangle className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -284,6 +314,75 @@ export default function AttendanceDashboard() {
           </div>
         </div>
       </div>
+      </div>
+
+      {showCorrectionModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Regularize Attendance</h3>
+              <button onClick={() => setShowCorrectionModal(false)} className="text-zinc-500 hover:text-black dark:hover:text-white">&times;</button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Date</label>
+                <input 
+                  type="date"
+                  value={correctionForm.date}
+                  onChange={e => setCorrectionForm({...correctionForm, date: e.target.value})}
+                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent"
+                />
+              </div>
+              <div className="flex gap-4">
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-sm font-medium">Check In</label>
+                  <input 
+                    type="time"
+                    value={correctionForm.checkIn}
+                    onChange={e => setCorrectionForm({...correctionForm, checkIn: e.target.value})}
+                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent"
+                  />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-sm font-medium">Check Out</label>
+                  <input 
+                    type="time"
+                    value={correctionForm.checkOut}
+                    onChange={e => setCorrectionForm({...correctionForm, checkOut: e.target.value})}
+                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Reason</label>
+                <textarea 
+                  value={correctionForm.reason}
+                  onChange={e => setCorrectionForm({...correctionForm, reason: e.target.value})}
+                  placeholder="e.g. Forgot to punch in"
+                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-transparent resize-none h-24"
+                />
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 flex justify-end space-x-3">
+              <button 
+                onClick={() => setShowCorrectionModal(false)}
+                className="px-4 py-2 rounded-md font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={submitCorrection}
+                disabled={!correctionForm.date || !correctionForm.reason}
+                className="px-4 py-2 rounded-md font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-50"
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
