@@ -14,14 +14,17 @@ Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) bu
 ## 🌟 Key Features
 
 ### 1. Unified Dashboard & Analytics
-- **Admin Command Center:** Real-time metrics showing daily attendance (Present/Absent counts), pending leaves, and active capacity.
+- **Admin Command Center:** Real-time analytics and reporting metrics showing daily attendance (Present/Absent counts), pending leaves, and active capacity.
 - **Employee Directory:** Searchable, paginated directory of all organization members.
 - **Employee Portal:** Personalized view of recent attendance history, upcoming leaves, and 6-month payroll summary.
 
-### 2. Multi-Tenant Role-Based Access Control (RBAC)
+### 2. Identity & Access Management (IAM / RBAC)
+- **Self-Registration Flow:** Full signup pipeline capturing Employee ID, Email, secure Password (enforcing complexity rules), and Role selection.
 - **Roles:** `ADMIN`, `HR`, and `EMPLOYEE`.
 - Strictly enforced server-side route protection using NextAuth.js (JWT).
 - Secure data isolation—employees can only access their own data.
+- **Profile Management (View & Edit):** Users can view their comprehensive profile (personal details, job title, salary structures, and documents).
+- **Strict Field-Level Edit RBAC:** Administrators can edit *all* employee profile fields. Regular employees are heavily restricted and can *only* edit their Phone, Address, Emergency Contact, and Avatar.
 
 ### 2. Geolocation-Aware Attendance
 - Capture precise check-in and check-out coordinates using the browser Geolocation API.
@@ -40,9 +43,9 @@ Dayflow is a modern, enterprise-grade Human Resource Management System (HRMS) bu
 - Generates professional, downloadable **PDF Salary Slips** entirely on the server using `@react-pdf/renderer`.
 - Translates Net Pay directly into English words (e.g., "FORTY THOUSAND RUPEES ONLY") for official documentation.
 
-### 5. Enterprise Compliance
+### 5. Enterprise Compliance & Notifications
 - **Immutable Audit Logs:** Tracks all sensitive actions (approvals, overrides, profile updates) to ensure strict enterprise accountability.
-- Real-time in-app bell notifications for leave status updates.
+- **Real-Time Notification Alerts:** In-app bell notifications instantly alert employees and HR regarding leave status updates and approvals, replacing the need for delayed email chains.
 - **Robust Database Seeding:** A comprehensive data pipeline that instantly generates 30 realistic employees, over 6 months of historical attendance (4,000+ records), 80 leave requests, and complex payroll data for immediate testing.
 
 ## 🚀 Tech Stack
