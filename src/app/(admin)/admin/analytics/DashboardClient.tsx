@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-export default function DashboardClient({ headcountData, leaveData, payrollData, absenteesData, attendanceRateData }: any) {
+export default function DashboardClient({ headcountData, leaveData, payrollData, absenteesData, attendanceRateData, riskData }: any) {
   return (
     <div className="space-y-6">
       
@@ -96,37 +96,89 @@ export default function DashboardClient({ headcountData, leaveData, payrollData,
         </Card>
       </div>
 
-      {/* Bottom Row: Top Absentees Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Absentees (All Time)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee Name</TableHead>
-                <TableHead className="text-right">Total Absent Days</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {absenteesData.map((emp: any, i: number) => (
-                <TableRow key={i}>
-                  <TableCell className="font-medium">{emp.name}</TableCell>
-                  <TableCell className="text-right text-red-500 font-bold">{emp.absences}</TableCell>
-                </TableRow>
-              ))}
-              {absenteesData.length === 0 && (
+      {/* Bottom Row: Top Absentees Table & Attrition Risk */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Absentees (All Time)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={2} className="text-center text-muted-foreground">
-                    No absences recorded.
-                  </TableCell>
+                  <TableHead>Employee Name</TableHead>
+                  <TableHead className="text-right">Total Absent Days</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {absenteesData.map((emp: any, i: number) => (
+                  <TableRow key={i}>
+                    <TableCell className="font-medium">{emp.name}</TableCell>
+                    <TableCell className="text-right text-red-500 font-bold">{emp.absences}</TableCell>
+                  </TableRow>
+                ))}
+                {absenteesData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center text-muted-foreground">
+                      No absences recorded.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-200">
+          <CardHeader>
+            <CardTitle className="text-orange-600">Attrition Risk (Heuristic Signals)</CardTitle>
+            <p className="text-xs text-muted-foreground italic mt-1">
+              * This is a heuristic signal for HR follow-up based on attendance patterns, not a performance judgment.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Risk Level</TableHead>
+                  <TableHead>Contributing Reasons</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {riskData && riskData.map((risk: any, i: number) => (
+                  <TableRow key={i}>
+                    <TableCell className="font-medium">{risk.name}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        risk.score === 'HIGH' ? 'bg-red-100 text-red-700' : 
+                        risk.score === 'MEDIUM' ? 'bg-orange-100 text-orange-700' : 
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {risk.score}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <ul className="list-disc pl-4 space-y-1">
+                        {risk.reasons.map((r: string, idx: number) => (
+                          <li key={idx} className="text-muted-foreground">{r}</li>
+                        ))}
+                      </ul>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!riskData || riskData.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground py-6">
+                      No elevated attrition risks detected in the latest 12-week window.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

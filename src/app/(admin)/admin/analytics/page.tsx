@@ -3,6 +3,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
+import { computeAttritionRisk } from "@/lib/analytics/risk";
 
 export default async function AnalyticsPage() {
   const session = await getServerSession(authOptions);
@@ -99,6 +100,9 @@ export default async function AnalyticsPage() {
     };
   });
 
+  // 6. Attrition Risk (Heuristic)
+  const riskData = await computeAttritionRisk(orgId);
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <h1 className="text-3xl font-bold mb-6">Analytics Dashboard</h1>
@@ -108,6 +112,7 @@ export default async function AnalyticsPage() {
         payrollData={payrollData}
         absenteesData={absenteesData}
         attendanceRateData={attendanceRateData}
+        riskData={riskData}
       />
     </div>
   );
