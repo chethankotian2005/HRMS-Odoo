@@ -1,36 +1,189 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HRMS Application
+
+This is a modern HRMS application built with:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Prisma ORM
+- PostgreSQL
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. Set up your `.env` file with a valid PostgreSQL `DATABASE_URL`:
+   ```bash
+   DATABASE_URL="postgresql://user:password@localhost:5432/hrms?schema=public"
+   ```
+
+3. Run the Prisma migrations to create your database tables:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Entity Relationship Diagram (ERD)
+
+Below is the database schema designed for this HRMS application:
+
+```mermaid
+erDiagram
+    Organization {
+        String id PK
+        String name
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    User {
+        String id PK
+        String orgId FK
+        String email
+        String password
+        String role
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    Employee {
+        String id PK
+        String orgId FK
+        String userId FK
+        String departmentId FK
+        String firstName
+        String lastName
+        String email
+        String phone
+        DateTime hireDate
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    Department {
+        String id PK
+        String orgId FK
+        String name
+        String description
+        String managerId FK
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    AttendanceRecord {
+        String id PK
+        String orgId FK
+        String employeeId FK
+        DateTime date
+        DateTime checkIn
+        DateTime checkOut
+        String status
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    LeaveType {
+        String id PK
+        String orgId FK
+        String name
+        String description
+        Int daysAllowed
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    LeaveRequest {
+        String id PK
+        String orgId FK
+        String employeeId FK
+        String leaveTypeId FK
+        DateTime startDate
+        DateTime endDate
+        String status
+        String reason
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    LeaveBalance {
+        String id PK
+        String orgId FK
+        String employeeId FK
+        String leaveTypeId FK
+        Int year
+        Float balance
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    PayrollRecord {
+        String id PK
+        String orgId FK
+        String employeeId FK
+        DateTime periodStart
+        DateTime periodEnd
+        Float basicSalary
+        Float deductions
+        Float bonuses
+        Float netPay
+        String status
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    Document {
+        String id PK
+        String orgId FK
+        String employeeId FK
+        String title
+        String url
+        String type
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+    AuditLog {
+        String id PK
+        String orgId FK
+        String userId FK
+        String action
+        String entity
+        String entityId
+        Json details
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+
+    Organization ||--o{ User : "has"
+    Organization ||--o{ Employee : "has"
+    Organization ||--o{ Department : "has"
+    Organization ||--o{ AttendanceRecord : "has"
+    Organization ||--o{ LeaveType : "has"
+    Organization ||--o{ LeaveRequest : "has"
+    Organization ||--o{ LeaveBalance : "has"
+    Organization ||--o{ PayrollRecord : "has"
+    Organization ||--o{ Document : "has"
+    Organization ||--o{ AuditLog : "has"
+
+    User ||--o| Employee : "can be"
+    User ||--o{ AuditLog : "creates"
+
+    Employee ||--o{ AttendanceRecord : "has"
+    Employee ||--o{ LeaveRequest : "has"
+    Employee ||--o{ LeaveBalance : "has"
+    Employee ||--o{ PayrollRecord : "has"
+    Employee ||--o{ Document : "has"
+
+    Department ||--o{ Employee : "has"
+
+    LeaveType ||--o{ LeaveRequest : "has"
+    LeaveType ||--o{ LeaveBalance : "has"
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
