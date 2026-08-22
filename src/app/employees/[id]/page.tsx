@@ -141,6 +141,11 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                         <p className="font-semibold text-green-600">${pr.netPay.toLocaleString()}</p>
                       </div>
                     ))}
+                    <div className="pt-2 mt-4">
+                      <Link href={`/employees/${employee.id}/payroll`} className="block w-full">
+                        <Button variant="outline" className="w-full">View Payroll Details</Button>
+                      </Link>
+                    </div>
                   </div>
                 )}
               </CardContent>
