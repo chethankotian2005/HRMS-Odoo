@@ -8,7 +8,7 @@ export interface UserContext {
 }
 
 export interface ResourceContext {
-  type: 'AttendanceRecord' | 'PayrollRecord' | 'Employee' | 'Department' | 'LeaveRequest' | 'Generic';
+  type: 'AttendanceRecord' | 'PayrollRecord' | 'Employee' | 'Department' | 'LeaveRequest' | 'Document' | 'Generic';
   ownerId?: string; // e.g., the employeeId that owns this record
   orgId?: string;   // the orgId this record belongs to
 }
@@ -64,3 +64,20 @@ export function can(user: UserContext, action: Action, resource: ResourceContext
 
   return false;
 }
+
+/**
+ * Returns the list of fields a user is permitted to update on an Employee record.
+ * '*' means all fields.
+ */
+export function getPermittedEmployeeFields(user: UserContext): string[] {
+  if (user.role === 'ADMIN' || user.role === 'HR') {
+    return ['*'];
+  }
+  
+  if (user.role === 'EMPLOYEE') {
+    return ['phone', 'address', 'emergencyContact', 'avatarUrl'];
+  }
+
+  return [];
+}
+

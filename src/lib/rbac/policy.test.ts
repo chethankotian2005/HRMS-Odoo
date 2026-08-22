@@ -1,4 +1,4 @@
-import { can, UserContext, ResourceContext } from './policy';
+import { can, UserContext, ResourceContext, getPermittedEmployeeFields } from './policy';
 
 describe('RBAC Policy: can()', () => {
   const org1 = 'org-1';
@@ -58,6 +58,11 @@ describe('RBAC Policy: can()', () => {
       };
       expect(can(employeeUser, 'delete', resource)).toBe(false);
     });
+
+    it('should allow EMPLOYEE to update ONLY specific fields on their own profile', () => {
+      const allowed = getPermittedEmployeeFields(employeeUser);
+      expect(allowed).toEqual(['phone', 'address', 'emergencyContact', 'avatarUrl']);
+    });
   });
 
   describe('ADMIN Role', () => {
@@ -84,6 +89,11 @@ describe('RBAC Policy: can()', () => {
         orgId: org2, // different org
       };
       expect(can(adminUser, 'read', resource)).toBe(false);
+    });
+
+    it('should allow ADMIN to update ALL fields on any employee profile', () => {
+      const allowed = getPermittedEmployeeFields(adminUser);
+      expect(allowed).toEqual(['*']);
     });
   });
 
