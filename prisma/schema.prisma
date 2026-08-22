@@ -118,7 +118,7 @@ model AttendanceRecord {
 
   @@index([orgId])
   @@index([employeeId])
-  @@index([employeeId, date])
+  @@unique([employeeId, date])
 }
 
 model LeaveType {
