@@ -79,19 +79,19 @@ export const SalarySlipPDF = ({ employee, payroll }: SalarySlipProps) => {
             </View>
             <View style={styles.tableCell}>
               <Text>Basic Salary</Text>
-              <Text>${payroll.basicSalary.toLocaleString()}</Text>
+              <Text>₹{payroll.basicSalary.toLocaleString()}</Text>
             </View>
             <View style={styles.tableCell}>
               <Text>HRA</Text>
-              <Text>${payroll.hra.toLocaleString()}</Text>
+              <Text>₹{payroll.hra.toLocaleString()}</Text>
             </View>
             <View style={styles.tableCell}>
               <Text>Allowances</Text>
-              <Text>${payroll.allowances.toLocaleString()}</Text>
+              <Text>₹{payroll.allowances.toLocaleString()}</Text>
             </View>
             <View style={[styles.tableCell, { marginTop: 20, borderTop: '1px solid #ccc', fontWeight: 'bold' }]}>
               <Text>Gross Pay</Text>
-              <Text>${payroll.grossPay.toLocaleString()}</Text>
+              <Text>₹{payroll.grossPay.toLocaleString()}</Text>
             </View>
           </View>
 
@@ -102,21 +102,21 @@ export const SalarySlipPDF = ({ employee, payroll }: SalarySlipProps) => {
             </View>
             <View style={styles.tableCell}>
               <Text>Provident Fund (PF)</Text>
-              <Text>${payroll.pf.toLocaleString()}</Text>
+              <Text>₹{payroll.pf.toLocaleString()}</Text>
             </View>
             <View style={styles.tableCell}>
               <Text>Professional Tax</Text>
-              <Text>${payroll.professionalTax.toLocaleString()}</Text>
+              <Text>₹{payroll.professionalTax.toLocaleString()}</Text>
             </View>
             {payroll.lopDays > 0 && (
               <View style={styles.tableCell}>
                 <Text>LOP ({payroll.lopDays} days)</Text>
-                <Text>${lopDeduction.toLocaleString()}</Text>
+                <Text>₹{lopDeduction.toLocaleString()}</Text>
               </View>
             )}
             <View style={[styles.tableCell, { marginTop: payroll.lopDays > 0 ? 0 : 20, borderTop: '1px solid #ccc', fontWeight: 'bold' }]}>
               <Text>Total Deductions</Text>
-              <Text>${payroll.deductions.toLocaleString()}</Text>
+              <Text>₹{payroll.deductions.toLocaleString()}</Text>
             </View>
           </View>
         </View>
@@ -124,9 +124,9 @@ export const SalarySlipPDF = ({ employee, payroll }: SalarySlipProps) => {
         <View style={styles.netPaySection}>
           <View style={styles.flexRow}>
             <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Net Pay</Text>
-            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>${payroll.netPay.toLocaleString()}</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>₹{payroll.netPay.toLocaleString()}</Text>
           </View>
-          <Text style={{ marginTop: 10, fontStyle: 'italic', fontSize: 10 }}>Amount in words: {netPayWords} DOLLARS ONLY</Text>
+          <Text style={{ marginTop: 10, fontStyle: 'italic', fontSize: 10 }}>Amount in words: {netPayWords} RUPEES ONLY</Text>
         </View>
 
         <View style={styles.footer}>

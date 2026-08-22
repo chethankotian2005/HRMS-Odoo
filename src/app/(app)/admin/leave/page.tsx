@@ -105,8 +105,8 @@ export default function AdminLeavePage() {
                 {/* Conflict Warning Banner */}
                 {r.conflicts?.warnings?.length > 0 && (
                   <div className="rounded-md border border-orange-200 bg-orange-50 p-3 space-y-1">
-                    <p className="text-sm font-semibold text-orange-800">
-                      ⚠️ Approving this drops department capacity to {r.conflicts.minCapacityPercent}%
+                    <p className="text-sm font-medium text-orange-800">
+                      Approving this drops department capacity to {r.conflicts.minCapacityPercent}%
                     </p>
                     {r.conflicts.warnings.slice(0, 3).map((w) => (
                       <p key={w.date} className="text-xs text-orange-700">

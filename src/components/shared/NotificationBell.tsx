@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { ClipboardList, CheckCircle2, XCircle, Bell } from "lucide-react";
 
 interface Notification {
   id: string; type: string; title: string; body: string;
@@ -39,10 +40,10 @@ export function NotificationBell() {
     setUnreadCount(0);
   };
 
-  const typeIcon: Record<string, string> = {
-    LEAVE_SUBMITTED: "📋",
-    LEAVE_APPROVED: "✅",
-    LEAVE_REJECTED: "❌",
+  const typeIcon: Record<string, React.ReactNode> = {
+    LEAVE_SUBMITTED: <ClipboardList className="h-5 w-5 text-blue-500" />,
+    LEAVE_APPROVED: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+    LEAVE_REJECTED: <XCircle className="h-5 w-5 text-red-500" />,
   };
 
   return (
@@ -52,9 +53,7 @@ export function NotificationBell() {
         onClick={() => setOpen((o) => !o)}
         className="relative p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none"
         aria-label="Notifications">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+        <Bell className="h-6 w-6 text-gray-600" />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -76,7 +75,9 @@ export function NotificationBell() {
             ) : notifications.map((n) => (
               <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 transition-colors ${!n.isRead ? "bg-blue-50" : ""}`}>
                 <div className="flex gap-2">
-                  <span className="text-lg">{typeIcon[n.type] ?? "🔔"}</span>
+                  <div className="flex-shrink-0 pt-1">
+                    {typeIcon[n.type] ?? <Bell className="h-5 w-5 text-gray-400" />}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm ${!n.isRead ? "font-semibold text-gray-900" : "text-gray-700"}`}>{n.title}</p>
                     <p className="text-xs text-gray-500 mt-0.5 truncate">{n.body}</p>

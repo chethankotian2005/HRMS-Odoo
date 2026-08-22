@@ -41,10 +41,10 @@ export default function PayrollTableClient({ records }: { records: PayrollRecord
                 onClick={() => setSelectedRecord(record)}
               >
                 <TableCell>{formatDate(record.periodStart)}</TableCell>
-                <TableCell>${record.basicSalary.toLocaleString()}</TableCell>
-                <TableCell>${record.grossPay.toLocaleString()}</TableCell>
-                <TableCell className="text-red-500">-${record.deductions.toLocaleString()}</TableCell>
-                <TableCell className="font-bold text-green-600">${record.netPay.toLocaleString()}</TableCell>
+                <TableCell>₹{record.basicSalary.toLocaleString()}</TableCell>
+                <TableCell>₹{record.grossPay.toLocaleString()}</TableCell>
+                <TableCell className="text-red-500">-₹{record.deductions.toLocaleString()}</TableCell>
+                <TableCell className="font-bold text-green-600">₹{record.netPay.toLocaleString()}</TableCell>
                 <TableCell>{record.status}</TableCell>
               </TableRow>
             ))}
@@ -74,19 +74,19 @@ export default function PayrollTableClient({ records }: { records: PayrollRecord
                 <h3 className="font-semibold mb-2">Earnings</h3>
                 <div className="flex justify-between py-1 text-sm">
                   <span>Basic Salary</span>
-                  <span>${selectedRecord.basicSalary.toLocaleString()}</span>
+                  <span>₹{selectedRecord.basicSalary.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between py-1 text-sm">
                   <span>HRA</span>
-                  <span>${selectedRecord.hra.toLocaleString()}</span>
+                  <span>₹{selectedRecord.hra.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between py-1 text-sm">
                   <span>Allowances</span>
-                  <span>${selectedRecord.allowances.toLocaleString()}</span>
+                  <span>₹{selectedRecord.allowances.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between py-1 font-semibold border-t mt-1 pt-1">
                   <span>Gross Pay</span>
-                  <span>${selectedRecord.grossPay.toLocaleString()}</span>
+                  <span>₹{selectedRecord.grossPay.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -94,29 +94,29 @@ export default function PayrollTableClient({ records }: { records: PayrollRecord
                 <h3 className="font-semibold mb-2">Deductions</h3>
                 <div className="flex justify-between py-1 text-sm text-red-500">
                   <span>PF (Provident Fund)</span>
-                  <span>-${selectedRecord.pf.toLocaleString()}</span>
+                  <span>-₹{selectedRecord.pf.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between py-1 text-sm text-red-500">
                   <span>Professional Tax</span>
-                  <span>-${selectedRecord.professionalTax.toLocaleString()}</span>
+                  <span>-₹{selectedRecord.professionalTax.toLocaleString()}</span>
                 </div>
                 
                 {getLopBreakdown(selectedRecord) && getLopBreakdown(selectedRecord).lopDays > 0 && (
                   <div className="flex justify-between py-1 text-sm text-red-500">
                     <span>Loss of Pay ({getLopBreakdown(selectedRecord).lopDays} days)</span>
-                    <span>-${getLopBreakdown(selectedRecord).lopDeduction.toLocaleString()}</span>
+                    <span>-₹{getLopBreakdown(selectedRecord).lopDeduction.toLocaleString()}</span>
                   </div>
                 )}
                 
                 <div className="flex justify-between py-1 font-semibold border-t mt-1 pt-1 text-red-500">
                   <span>Total Deductions</span>
-                  <span>-${selectedRecord.deductions.toLocaleString()}</span>
+                  <span>-₹{selectedRecord.deductions.toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="bg-muted p-4 rounded-lg flex justify-between items-center">
                 <span className="font-bold text-lg">Net Pay</span>
-                <span className="font-bold text-xl text-green-600">${selectedRecord.netPay.toLocaleString()}</span>
+                <span className="font-bold text-xl text-green-600">₹{selectedRecord.netPay.toLocaleString()}</span>
               </div>
 
               <div className="mt-6 border-t pt-4 flex justify-end">

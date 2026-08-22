@@ -133,10 +133,10 @@ export default function AdminPayrollClient({ employees, currentYear, currentMont
               return (
                 <TableRow key={emp.id}>
                   <TableCell className="font-medium">{emp.firstName} {emp.lastName}</TableCell>
-                  <TableCell>${struct?.basicSalary.toLocaleString() || 'N/A'}</TableCell>
-                  <TableCell>{payroll ? `$${payroll.grossPay.toLocaleString()}` : '-'}</TableCell>
-                  <TableCell className="text-red-500">{payroll ? `-$${payroll.deductions.toLocaleString()}` : '-'}</TableCell>
-                  <TableCell className="font-bold text-green-600">{payroll ? `$${payroll.netPay.toLocaleString()}` : '-'}</TableCell>
+                  <TableCell>₹{struct?.basicSalary.toLocaleString() || 'N/A'}</TableCell>
+                  <TableCell>{payroll ? `₹${payroll.grossPay.toLocaleString()}` : '-'}</TableCell>
+                  <TableCell className="text-red-500">{payroll ? `-₹${payroll.deductions.toLocaleString()}` : '-'}</TableCell>
+                  <TableCell className="font-bold text-green-600">{payroll ? `₹${payroll.netPay.toLocaleString()}` : '-'}</TableCell>
                   <TableCell>{payroll?.status || 'NOT RUN'}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm" onClick={() => openEditModal(emp)}>

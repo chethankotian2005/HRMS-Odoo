@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { CheckCircle2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -59,8 +60,8 @@ export default function ApplyLeavePage() {
     return (
       <div className="p-6 max-w-lg mx-auto">
         <Card className="border-green-200 bg-green-50">
-          <CardContent className="py-8 text-center">
-            <div className="text-4xl mb-3">✅</div>
+          <CardContent className="py-8 text-center flex flex-col items-center">
+            <CheckCircle2 className="h-12 w-12 text-green-600 mb-3" />
             <h2 className="text-lg font-semibold text-green-800">Leave request submitted!</h2>
             <p className="text-sm text-green-600 mt-1">Redirecting to your leave dashboard...</p>
           </CardContent>

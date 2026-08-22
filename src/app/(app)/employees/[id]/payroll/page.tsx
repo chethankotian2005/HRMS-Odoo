@@ -88,7 +88,7 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
             <CardTitle className="text-sm text-muted-foreground font-medium">Net Pay</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">${latestRecord?.netPay.toLocaleString() || '0'}</div>
+            <div className="text-2xl font-bold text-green-600">₹{latestRecord?.netPay.toLocaleString() || '0'}</div>
           </CardContent>
         </Card>
       </div>
