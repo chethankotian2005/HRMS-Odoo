@@ -145,7 +145,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
                           <p className="font-medium">{new Date(pr.periodStart).toLocaleDateString()} - {new Date(pr.periodEnd).toLocaleDateString()}</p>
                           <p className="text-xs text-muted-foreground">{pr.status}</p>
                         </div>
-                        <p className="font-semibold text-green-600">${pr.netPay.toLocaleString()}</p>
+                        <p className="font-semibold text-green-600">₹{pr.netPay.toLocaleString()}</p>
                       </div>
                     ))}
                     <div className="pt-2 mt-4">

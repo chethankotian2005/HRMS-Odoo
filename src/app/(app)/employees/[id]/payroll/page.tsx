@@ -64,7 +64,7 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
             <CardTitle className="text-sm text-muted-foreground font-medium">Current Gross</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${latestRecord?.grossPay.toLocaleString() || '0'}</div>
+            <div className="text-2xl font-bold">₹{latestRecord?.grossPay.toLocaleString() || '0'}</div>
           </CardContent>
         </Card>
         <Card>
@@ -72,7 +72,7 @@ export default async function EmployeePayrollPage({ params }: { params: Promise<
             <CardTitle className="text-sm text-muted-foreground font-medium">Deductions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">-${latestRecord?.deductions.toLocaleString() || '0'}</div>
+            <div className="text-2xl font-bold text-red-500">-₹{latestRecord?.deductions.toLocaleString() || '0'}</div>
           </CardContent>
         </Card>
         <Card>
