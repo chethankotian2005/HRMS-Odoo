@@ -7,11 +7,11 @@ export const PUT = withAuth(
   "update",
   async (req, context) => ({
     type: "Employee",
-    ownerId: context.params.id,
+    ownerId: (await context.params).id,
   }),
   async (req, context, user, audit) => {
     try {
-      const { id } = context.params;
+      const { id } = await context.params;
       const body = await req.json();
 
       // Ensure the employee exists and belongs to the user's org

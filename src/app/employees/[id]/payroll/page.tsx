@@ -9,11 +9,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
-export default async function EmployeePayrollPage({ params }: { params: { id: string } }) {
+export default async function EmployeePayrollPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
-  const hasAccess = can(session.user as any, 'read', { type: 'PayrollRecord', ownerId: params.id, orgId: session.user.orgId });
+  const hasAccess = can(session.user as any, 'read', { type: 'PayrollRecord', ownerId: id, orgId: session.user.orgId });
   
   if (!hasAccess) {
     return (
@@ -25,7 +26,7 @@ export default async function EmployeePayrollPage({ params }: { params: { id: st
   }
 
   const employee = await prisma.employee.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     select: { firstName: true, lastName: true }
   });
 
@@ -33,7 +34,7 @@ export default async function EmployeePayrollPage({ params }: { params: { id: st
 
   // Fetch up to 6 latest payroll records
   const records = await prisma.payrollRecord.findMany({
-    where: { employeeId: params.id, orgId: session.user.orgId },
+    where: { employeeId: id, orgId: session.user.orgId },
     orderBy: { periodStart: 'desc' },
     take: 6,
   });
@@ -43,7 +44,7 @@ export default async function EmployeePayrollPage({ params }: { params: { id: st
   return (
     <div className="container mx-auto p-6 max-w-5xl space-y-6">
       <div className="flex items-center space-x-4">
-        <Link href={`/employees/${params.id}`}>
+        <Link href={`/employees/${id}`}>
           <Button variant="outline" size="icon">
             <ChevronLeft className="h-4 w-4" />
           </Button>

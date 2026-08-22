@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export default async function AuditDashboard({
   searchParams,
 }: {
-  searchParams: { actor?: string; entity?: string };
+  searchParams: Promise<{ actor?: string; entity?: string }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -26,7 +26,7 @@ export default async function AuditDashboard({
     redirect("/login");
   }
 
-  const { actor, entity } = searchParams;
+  const { actor, entity } = await searchParams;
 
   const whereClause: any = {
     orgId: session.user.orgId,

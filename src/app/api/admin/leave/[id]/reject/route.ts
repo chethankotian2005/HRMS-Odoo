@@ -8,7 +8,8 @@ const rejectSchema = z.object({
   rejectionReason: z.string().min(5, "Please provide a reason (at least 5 characters)."),
 });
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!["HR", "ADMIN"].includes(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const leaveRequest = await prisma.leaveRequest.findFirst({
-    where: { id: params.id, orgId: session.user.orgId, status: "PENDING", deletedAt: null },
+    where: { id: id, orgId: session.user.orgId, status: "PENDING", deletedAt: null },
     include: { leaveType: true },
   });
   if (!leaveRequest) return NextResponse.json({ error: "Leave request not found or not pending" }, { status: 404 });
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // Transactional: reject + audit log
   await prisma.$transaction(async (tx) => {
     await tx.leaveRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: "REJECTED", rejectionReason: parsed.data.rejectionReason, approvedById: session.user!.id, approvedAt: new Date() },
     });
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         userId: session.user!.id,
         action: "LEAVE_REJECTED",
         entity: "LeaveRequest",
-        entityId: params.id,
+        entityId: id,
         details: { rejectionReason: parsed.data.rejectionReason },
       },
     });
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         type: "LEAVE_REJECTED",
         title: "Leave Rejected",
         body: `Your ${leaveRequest.leaveType.name} leave request was rejected. Reason: ${parsed.data.rejectionReason}`,
-        entityId: params.id,
+        entityId: id,
       },
     });
   }

@@ -6,11 +6,11 @@ import { can } from "@/lib/rbac/policy";
 import { renderToStream } from "@react-pdf/renderer";
 import { SalarySlipPDF } from "@/lib/pdf/SalarySlipPDF";
 
-export async function GET(req: Request, { params }: { params: { id: string, periodStart: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string; periodStart: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { id, periodStart } = params;
+  const { id, periodStart } = await params;
 
   const hasAccess = can(session.user as any, 'read', { type: 'PayrollRecord', ownerId: id, orgId: session.user.orgId });
   if (!hasAccess) {

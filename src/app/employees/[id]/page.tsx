@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 
-export default async function EmployeeProfilePage({ params }: { params: { id: string } }) {
+export default async function EmployeeProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
   const employee = await prisma.employee.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       department: true,
       payrollRecords: {

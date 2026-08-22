@@ -12,7 +12,8 @@ const overrideSchema = z.object({
   reason: z.string().min(1, "Reason is required for manual override"),
 });
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -21,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const recordId = params.id;
+  const recordId = id;
   
   const existingRecord = await prisma.attendanceRecord.findUnique({
     where: { id: recordId }

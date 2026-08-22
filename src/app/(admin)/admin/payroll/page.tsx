@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import AdminPayrollClient from "./AdminPayrollClient";
 
-export default async function AdminPayrollPage({ searchParams }: { searchParams: { month?: string, year?: string } }) {
+export default async function AdminPayrollPage({ searchParams }: { searchParams: Promise<{ month?: string; year?: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
@@ -19,8 +19,9 @@ export default async function AdminPayrollPage({ searchParams }: { searchParams:
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
 
-  const targetYear = parseInt(searchParams.year || currentYear.toString());
-  const targetMonth = parseInt(searchParams.month || currentMonth.toString());
+  const { month, year } = await searchParams;
+  const targetYear = parseInt(year || currentYear.toString());
+  const targetMonth = parseInt(month || currentMonth.toString());
 
   const startDate = new Date(targetYear, targetMonth - 1, 1);
   const endDate = new Date(targetYear, targetMonth, 0);

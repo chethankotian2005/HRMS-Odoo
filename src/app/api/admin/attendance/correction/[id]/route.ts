@@ -11,7 +11,8 @@ const decisionSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
 });
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -32,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   const { status } = parsed.data;
-  const correctionId = params.id;
+  const correctionId = id;
 
   try {
     const correction = await prisma.attendanceCorrection.findUnique({

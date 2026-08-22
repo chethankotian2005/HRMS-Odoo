@@ -4,13 +4,14 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { countWorkingDays } from "@/lib/holidays";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!["HR", "ADMIN"].includes(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const leaveRequest = await prisma.leaveRequest.findFirst({
-    where: { id: params.id, orgId: session.user.orgId, status: "PENDING", deletedAt: null },
+    where: { id: id, orgId: session.user.orgId, status: "PENDING", deletedAt: null },
     include: { leaveType: true, employee: { select: { firstName: true, lastName: true } } },
   });
   if (!leaveRequest) return NextResponse.json({ error: "Leave request not found or not pending" }, { status: 404 });
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   await prisma.$transaction(async (tx) => {
     // 1. Mark approved
     await tx.leaveRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: "APPROVED", approvedById: session.user!.id, approvedAt: new Date() },
     });
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           year,
           delta: -workingDays,
           reason: "APPROVED",
-          leaveRequestId: params.id,
+          leaveRequestId: id,
         },
       });
     }
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         userId: session.user!.id,
         action: "LEAVE_APPROVED",
         entity: "LeaveRequest",
-        entityId: params.id,
+        entityId: id,
         details: { workingDays, leaveTypeId: leaveRequest.leaveTypeId, year },
       },
     });
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         type: "LEAVE_APPROVED",
         title: "Leave Approved",
         body: `Your ${leaveRequest.leaveType.name} leave from ${leaveRequest.startDate.toISOString().split("T")[0]} to ${leaveRequest.endDate.toISOString().split("T")[0]} has been approved.`,
-        entityId: params.id,
+        entityId: id,
       },
     });
   }

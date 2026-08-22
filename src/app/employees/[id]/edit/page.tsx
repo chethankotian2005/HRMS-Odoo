@@ -5,12 +5,13 @@ import { notFound, redirect } from "next/navigation";
 import { can, getPermittedEmployeeFields } from "@/lib/rbac/policy";
 import { EditEmployeeForm } from "./edit-form";
 
-export default async function EditEmployeePage({ params }: { params: { id: string } }) {
+export default async function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user) return redirect("/login");
 
   const employee = await prisma.employee.findUnique({
-    where: { id: params.id },
+    where: { id: id },
   });
 
   if (!employee || employee.orgId !== session.user.orgId) {
